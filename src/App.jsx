@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 const API_KEY = "a00890c3";
 
+/* ================= CUSTOM HOOK ================= */
 function useMovies(search, page) {
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -13,6 +14,7 @@ function useMovies(search, page) {
     const fetchMovies = async () => {
       setLoading(true);
       setError("");
+
       try {
         const res = await fetch(
           `https://www.omdbapi.com/?s=${search}&page=${page}&apikey=${API_KEY}`
@@ -28,6 +30,7 @@ function useMovies(search, page) {
       } catch {
         setError("Something went wrong");
       }
+
       setLoading(false);
     };
 
@@ -37,6 +40,7 @@ function useMovies(search, page) {
   return { movies, loading, error };
 }
 
+/* ================= APP ================= */
 export default function App() {
   const [search, setSearch] = useState("batman");
   const [page, setPage] = useState(1);
@@ -44,15 +48,17 @@ export default function App() {
 
   const { movies, loading, error } = useMovies(search, page);
 
+  /* Load favorites */
   useEffect(() => {
     const saved = JSON.parse(localStorage.getItem("favorites"));
     if (saved) setFavorites(saved);
   }, []);
 
+  /* Toggle favorite */
   const toggleFavorite = (movie) => {
     const exists = favorites.find((f) => f.imdbID === movie.imdbID);
-    let updated;
 
+    let updated;
     if (exists) {
       updated = favorites.filter((f) => f.imdbID !== movie.imdbID);
     } else {
@@ -64,12 +70,20 @@ export default function App() {
   };
 
   return (
-    <div className="bg-black text-white min-h-screen">
-      {/* Navbar */}
-      <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-b from-black to-transparent">
-        <h1 className="text-red-600 text-2xl font-bold">NETFLIX</h1>
+    <div className="min-h-screen" style={{ background: "#141414", color: "#fff" }}>
+
+      {/* ================= NAVBAR ================= */}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "20px"
+      }}>
+        <h1 style={{ color: "#e50914", fontSize: "24px" }}>
+          NETFLIX
+        </h1>
+
         <input
-          className="bg-gray-800 px-3 py-1 rounded text-sm outline-none"
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
@@ -79,20 +93,20 @@ export default function App() {
         />
       </div>
 
-      {/* States */}
-      {loading && <p className="px-6">Loading...</p>}
-      {error && <p className="px-6 text-red-500">{error}</p>}
+      {/* ================= STATES ================= */}
+      {loading && <p style={{ paddingLeft: "20px" }}>Loading...</p>}
+      {error && <p style={{ paddingLeft: "20px", color: "red" }}>{error}</p>}
 
-      {/* Movies */}
-      <div className="px-6 mt-4">
-        <h2 className="text-xl font-semibold mb-3">Popular</h2>
+      {/* ================= MOVIES ================= */}
+      <div style={{ padding: "20px" }}>
+        <h2>Popular</h2>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        {movies.length === 0 && !loading && <p>No movies found</p>}
+
+        <div className="grid">
           {movies.map((movie) => (
-            <div
-              key={movie.imdbID}
-              className="relative group cursor-pointer"
-            >
+            <div key={movie.imdbID} className="movie-card">
+
               <img
                 src={
                   movie.Poster !== "N/A"
@@ -100,58 +114,56 @@ export default function App() {
                     : "https://via.placeholder.com/300"
                 }
                 alt={movie.Title}
-                className="rounded-lg w-full h-72 object-cover group-hover:scale-105 transition duration-300"
               />
 
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-black bg-opacity-70 opacity-0 group-hover:opacity-100 transition flex flex-col justify-end p-3 rounded-lg">
-                <h3 className="text-sm font-bold">{movie.Title}</h3>
-                <p className="text-xs">{movie.Year}</p>
+              <div className="card-content">
+                <h3>{movie.Title}</h3>
+                <p>{movie.Year}</p>
 
-                <button
-                  onClick={() => toggleFavorite(movie)}
-                  className="mt-2 bg-red-600 hover:bg-red-700 text-xs px-2 py-1 rounded"
-                >
+                <button onClick={() => toggleFavorite(movie)}>
                   {favorites.find((f) => f.imdbID === movie.imdbID)
                     ? "💔 Remove"
                     : "❤️ Favorite"}
                 </button>
               </div>
+
             </div>
           ))}
         </div>
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center items-center gap-4 mt-8">
-        <button
-          onClick={() => setPage((p) => Math.max(p - 1, 1))}
-          className="bg-gray-800 px-4 py-2 rounded hover:bg-gray-700"
-        >
+      {/* ================= PAGINATION ================= */}
+      <div className="pagination">
+        <button onClick={() => setPage((p) => Math.max(p - 1, 1))}>
           Prev
         </button>
+
         <span>Page {page}</span>
-        <button
-          onClick={() => setPage((p) => p + 1)}
-          className="bg-gray-800 px-4 py-2 rounded hover:bg-gray-700"
-        >
+
+        <button onClick={() => setPage((p) => p + 1)}>
           Next
         </button>
       </div>
 
-      {/* Favorites */}
-      <div className="px-6 mt-10">
-        <h2 className="text-xl font-semibold mb-3">My List ⭐</h2>
-        <div className="flex gap-4 overflow-x-auto">
+      {/* ================= FAVORITES ================= */}
+      <div className="favorites">
+        <h2>My List ⭐</h2>
+
+        <div className="favorites-row">
           {favorites.map((movie) => (
             <img
               key={movie.imdbID}
-              src={movie.Poster}
-              className="w-32 rounded"
+              src={
+                movie.Poster !== "N/A"
+                  ? movie.Poster
+                  : "https://via.placeholder.com/150"
+              }
+              alt={movie.Title}
             />
           ))}
         </div>
       </div>
+
     </div>
   );
 }
