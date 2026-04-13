@@ -6,8 +6,7 @@ A Netflix-style movie search app built with React and OMDB API.
 
 ## 📸 Preview
 
-![App Screenshot](./assets/ss.png)
-
+![App Screenshot](./src/assets/ss.png)
 ---
 
 ## 🚀 Features
