@@ -1,3 +1,5 @@
+LIVE: **https://frontend-intern-project8a-7jt5.vercel.app/**
+
 # 🎬 Movie Search App
 
 A Netflix-style movie search app built with React and OMDB API.
